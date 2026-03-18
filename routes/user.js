@@ -1,15 +1,14 @@
 const { Router } = require("express");
 const userRouter = Router();
-const { userModel } = require("./db");
+const { userModel } = require("../db");
 const { z } = require("zod");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const JWT_SECRET = "Krishna90978";
 
 userRouter.post("/signup", async function (req, res) {
   const { email, password, firstName, lastName } = req.body;
   const validate = z.object({
-    email: z.email("Invalid email address").string(),
+    email: z.email("Invalid email address"),
     password: z.string(),
     firstName: z.string(),
     lastName: z.string(),
@@ -41,7 +40,7 @@ userRouter.post("/signup", async function (req, res) {
 userRouter.post("/signin", async function (req, res) {
   const { email, password } = req.body;
   const validateUser = z.object({
-    email: z.email().string(),
+    email: z.email("Invalid email address"),
     password: z.string(),
   });
 
@@ -69,9 +68,9 @@ userRouter.post("/signin", async function (req, res) {
   }
   const token = jwt.sign(
     {
-      UserId: user._id,
+      Id: user._id,
     },
-    JWT_SECRET,
+    process.env.SECRET_KEY,
   );
   res.json({
     token: token,
