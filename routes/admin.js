@@ -74,7 +74,7 @@ adminRouter.post("/signin", async function (req, res) {
     token: token,
   });
 });
-adminRouter.post("/course", async function (req, next, res) {
+adminRouter.post("/course", auth_admin, async function (req, res) {
   const adminId = req.adminId;
   const { title, descreption, price, imageURL } = req.body;
   const course = await courseModel.create({
@@ -89,8 +89,36 @@ adminRouter.post("/course", async function (req, next, res) {
     courseId: course._id,
   });
 });
-adminRouter.put("/course", function (req, res) {});
-adminRouter.get("/all", function (req, res) {});
+adminRouter.put("/course", auth_admin, async function (req, res) {
+  const adminId = req.adminId;
+  const { title, descreption, price, imageURL, courseId } = req.body;
+  const course = await adminModel.updateOne(
+    {
+      _id: courseId,
+      creatorId: adminId,
+    },
+    {
+      title: title,
+      descreption: descreption,
+      price: price,
+      imageURL: imageURL,
+    },
+  );
+  res.json({
+    message: "course Updated",
+    couseId: course._id,
+  });
+});
+adminRouter.get("/all", auth_admin, async function (req, res) {
+  const adminId = req.adminId;
+  const course = await adminModel.find({
+    creatorId: adminId,
+  });
+  res.json({
+    message: "Course update",
+    courseId: course._id,
+  });
+});
 
 module.exports = {
   adminRouter: adminRouter,
