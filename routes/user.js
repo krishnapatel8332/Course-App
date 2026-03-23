@@ -1,9 +1,10 @@
 const { Router } = require("express");
 const userRouter = Router();
-const { userModel } = require("../db");
+const { userModel, courseModel } = require("../db");
 const { z } = require("zod");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { user_auth } = require("../middleware/user");
 
 userRouter.post("/signup", async function (req, res) {
   const { email, password, firstName, lastName } = req.body;
@@ -78,9 +79,14 @@ userRouter.post("/signin", async function (req, res) {
   });
 });
 
-userRouter.get("/purchases", function (req, res) {
+userRouter.get("/purchases", user_auth, async function (req, res) {
+  const userId = req.userId;
+  const courses = await courseModel.find({
+    userId,
+  });
   res.json({
-    message: "No data is found",
+    message: "Your courses",
+    courses,
   });
 });
 

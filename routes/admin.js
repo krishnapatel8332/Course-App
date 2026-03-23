@@ -1,6 +1,6 @@
 const { Router } = require("express");
 const adminRouter = Router();
-const { adminModel, courseModel } = require("../db");
+const { adminModel, courseModel, userModel } = require("../db");
 const { z } = require("zod");
 const bcrypt = require("bcrypt");
 require("dotenv").config();
@@ -76,10 +76,10 @@ adminRouter.post("/signin", async function (req, res) {
 });
 adminRouter.post("/course", auth_admin, async function (req, res) {
   const adminId = req.adminId;
-  const { title, descreption, price, imageURL } = req.body;
+  const { title, description, price, imageURL } = req.body;
   const course = await courseModel.create({
     title: title,
-    descreption: descreption,
+    description: description,
     price: price,
     imageURL: imageURL,
     creatorId: adminId,
@@ -91,32 +91,38 @@ adminRouter.post("/course", auth_admin, async function (req, res) {
 });
 adminRouter.put("/course", auth_admin, async function (req, res) {
   const adminId = req.adminId;
-  const { title, descreption, price, imageURL, courseId } = req.body;
-  const course = await adminModel.updateOne(
+  const { title, description, price, imageURL, courseId } = req.body;
+  const course = await courseModel.findOneAndUpdate(
     {
       _id: courseId,
       creatorId: adminId,
     },
     {
-      title: title,
-      descreption: descreption,
-      price: price,
-      imageURL: imageURL,
+      title,
+      description,
+      price,
+      imageURL,
     },
+    { new: true },
   );
+
+  if (!course) {
+    return res.json({ message: "Course not found" });
+  }
+
   res.json({
-    message: "course Updated",
-    couseId: course._id,
+    message: "Updated",
+    course,
   });
 });
 adminRouter.get("/all", auth_admin, async function (req, res) {
   const adminId = req.adminId;
-  const course = await adminModel.find({
+  const courses = await courseModel.find({
     creatorId: adminId,
   });
   res.json({
-    message: "Course update",
-    courseId: course._id,
+    message: "Courses",
+    courses,
   });
 });
 
